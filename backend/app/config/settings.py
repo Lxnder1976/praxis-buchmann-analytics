@@ -13,6 +13,13 @@ class Settings(BaseSettings):
     google_analytics_property_id: Optional[str] = None
     google_application_credentials: Optional[str] = None
     
+    # Google Search Console Configuration
+    google_search_console_site_url: Optional[str] = None
+    
+    # Google Ads Configuration
+    google_ads_customer_id: Optional[str] = None
+    google_ads_config_path: Optional[str] = None
+    
     # Database Configuration
     database_url: str = "sqlite:///./analytics.db"
     
