@@ -1,0 +1,41 @@
+# Google Ads API Configuration
+# Configuration for Customer ID: 931-425-1282
+
+# This is your Google Ads customer ID (without dashes)
+customer_id: "9314251282"
+
+# Real Developer token from Google Ads API Center
+developer_token: "YlwPBzu8iI5RErTJpTIKXg"
+
+# OAuth 2.0 configuration
+# You can use the same service account credentials as for Analytics
+use_proto_plus: True
+
+# Service Account Configuration (recommended for server applications)
+# This uses the same service account as Google Analytics
+json_key_file_path: "/Users/alex/Projects/Analytics/backend/credentials.json"
+
+# Alternatively, you can use OAuth 2.0 flow (for testing)
+# client_id: "YOUR_CLIENT_ID"
+# client_secret: "YOUR_CLIENT_SECRET"
+# refresh_token: "YOUR_REFRESH_TOKEN"
+
+# API version and other settings
+api_version: "v18"
+logging:
+  version: 1
+  disable_existing_loggers: False
+  formatters:
+    default_fmt:
+      format: '[%(asctime)s - %(levelname)s] %(message)s'
+      datefmt: '%Y-%m-%d %H:%M:%S'
+  handlers:
+    default_handler:
+      class: logging.StreamHandler
+      formatter: default_fmt
+  loggers:
+    "google.ads.googleads":
+      level: INFO
+  root:
+    level: WARNING
+    handlers: [default_handler]

@@ -96,6 +96,71 @@ class GoogleAdsData(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class PageAnalyticsData(Base):
+    __tablename__ = "page_analytics_data"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    property_id = Column(String, nullable=False, index=True)
+    page_path = Column(String, nullable=False, index=True)
+    page_title = Column(String, nullable=True)
+    date_range = Column(String, nullable=False)  # e.g., "2025-11-02_2025-11-09"
+    
+    # Page Performance Metrics
+    page_views = Column(Integer, default=0)
+    sessions = Column(Integer, default=0)
+    users = Column(Integer, default=0)
+    average_session_duration = Column(Float, default=0.0)
+    bounce_rate = Column(Float, default=0.0)
+    
+    # Raw data
+    raw_data = Column(JSON, nullable=True)
+    
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class SearchQueryData(Base):
+    __tablename__ = "search_query_data"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    site_url = Column(String, nullable=False, index=True)
+    query = Column(String, nullable=False, index=True)
+    date_range = Column(String, nullable=False)  # e.g., "2025-11-02_2025-11-09"
+    
+    # Search Performance for this query
+    clicks = Column(Integer, default=0)
+    impressions = Column(Integer, default=0)
+    ctr = Column(Float, default=0.0)
+    position = Column(Float, default=0.0)
+    
+    # Raw data
+    raw_data = Column(JSON, nullable=True)
+    
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+class SearchPageData(Base):
+    __tablename__ = "search_page_data"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    site_url = Column(String, nullable=False, index=True)
+    page = Column(String, nullable=False, index=True)
+    date_range = Column(String, nullable=False)  # e.g., "2025-11-02_2025-11-09"
+    
+    # Search Performance for this page
+    clicks = Column(Integer, default=0)
+    impressions = Column(Integer, default=0)
+    ctr = Column(Float, default=0.0)
+    position = Column(Float, default=0.0)
+    
+    # Raw data
+    raw_data = Column(JSON, nullable=True)
+    
+    # Metadata
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 # Database Engine and Session
 def get_database_url():
     from app.config.settings import settings

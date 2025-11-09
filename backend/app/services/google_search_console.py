@@ -103,7 +103,6 @@ class GoogleSearchConsoleService:
                 for row in response['rows']:
                     record = {
                         'site_url': self.site_url,
-                        'date': datetime.now().date(),  # Summary data
                         'query': row['keys'][0],
                         'clicks': int(row.get('clicks', 0)),
                         'impressions': int(row.get('impressions', 0)),
@@ -141,7 +140,6 @@ class GoogleSearchConsoleService:
                 for row in response['rows']:
                     record = {
                         'site_url': self.site_url,
-                        'date': datetime.now().date(),  # Summary data
                         'page': row['keys'][0],
                         'clicks': int(row.get('clicks', 0)),
                         'impressions': int(row.get('impressions', 0)),

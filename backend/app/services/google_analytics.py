@@ -151,14 +151,126 @@ class GoogleAnalyticsService:
             logger.error(f"Error fetching traffic source data: {str(e)}")
             raise
     
+    def fetch_enhanced_metrics(self, start_date: str, end_date: str) -> List[Dict]:
+        """
+        Fetch enhanced analytics metrics including traffic sources and page data
+        
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+            
+        Returns:
+            List of dictionaries containing enhanced analytics data
+        """
+        try:
+            # First get basic metrics
+            basic_data = self.fetch_basic_metrics(start_date, end_date)
+            
+            # Then get traffic sources data
+            traffic_data = self.fetch_traffic_sources(start_date, end_date)
+            
+            # Merge the data by date
+            enhanced_data = []
+            for basic_record in basic_data:
+                # Find matching traffic data for the same date
+                traffic_record = next(
+                    (t for t in traffic_data if t['date'] == basic_record['date']), 
+                    {
+                        'organic_sessions': 0,
+                        'direct_sessions': 0,
+                        'referral_sessions': 0,
+                        'social_sessions': 0,
+                        'paid_sessions': 0
+                    }
+                )
+                
+                # Merge basic and traffic data
+                enhanced_record = {
+                    **basic_record,
+                    'organic_sessions': traffic_record.get('organic_sessions', 0),
+                    'direct_sessions': traffic_record.get('direct_sessions', 0),
+                    'referral_sessions': traffic_record.get('referral_sessions', 0),
+                    'social_sessions': traffic_record.get('social_sessions', 0),
+                }
+                
+                enhanced_data.append(enhanced_record)
+            
+            logger.info(f"Fetched enhanced data with traffic sources for {len(enhanced_data)} dates")
+            return enhanced_data
+            
+        except Exception as e:
+            logger.error(f"Error fetching enhanced metrics: {str(e)}")
+            # Fallback to basic metrics if traffic sources fail
+            logger.warning("Falling back to basic metrics without traffic sources")
+            return self.fetch_basic_metrics(start_date, end_date)
+    
+    def fetch_page_analytics(self, start_date: str, end_date: str, limit: int = 50) -> List[Dict]:
+        """
+        Fetch page-level analytics data
+        
+        Args:
+            start_date: Start date in YYYY-MM-DD format
+            end_date: End date in YYYY-MM-DD format
+            limit: Maximum number of pages to return
+            
+        Returns:
+            List of dictionaries containing page analytics data
+        """
+        try:
+            request = RunReportRequest(
+                property=f"properties/{self.property_id}",
+                date_ranges=[DateRange(start_date=start_date, end_date=end_date)],
+                dimensions=[
+                    Dimension(name="pagePath"),
+                    Dimension(name="pageTitle")
+                ],
+                metrics=[
+                    Metric(name="screenPageViews"),
+                    Metric(name="sessions"),
+                    Metric(name="totalUsers"),
+                    Metric(name="averageSessionDuration"),
+                    Metric(name="bounceRate"),
+                ],
+                limit=limit
+            )
+            
+            response = self.client.run_report(request=request)
+            
+            # Process response into structured data
+            data = []
+            for row in response.rows:
+                record = {
+                    'property_id': self.property_id,
+                    'page_path': row.dimension_values[0].value,
+                    'page_title': row.dimension_values[1].value,
+                    'page_views': int(row.metric_values[0].value or 0),
+                    'sessions': int(row.metric_values[1].value or 0),
+                    'users': int(row.metric_values[2].value or 0),
+                    'average_session_duration': float(row.metric_values[3].value or 0),
+                    'bounce_rate': float(row.metric_values[4].value or 0),
+                    'date_range': f"{start_date}_{end_date}",
+                    'raw_data': {
+                        'dimensions': [dim.value for dim in row.dimension_values],
+                        'metrics': [metric.value for metric in row.metric_values]
+                    }
+                }
+                data.append(record)
+            
+            logger.info(f"Fetched page analytics for {len(data)} pages")
+            return data
+            
+        except Exception as e:
+            logger.error(f"Error fetching page analytics: {str(e)}")
+            raise
+    
     def fetch_data_for_date_range(self, days_back: int = 7) -> List[Dict]:
         """
-        Convenience method to fetch data for the last N days
+        Convenience method to fetch enhanced data for the last N days
         """
         end_date = datetime.now().date()
         start_date = end_date - timedelta(days=days_back)
         
-        return self.fetch_basic_metrics(
+        return self.fetch_enhanced_metrics(
             start_date=start_date.strftime('%Y-%m-%d'),
             end_date=end_date.strftime('%Y-%m-%d')
         )
